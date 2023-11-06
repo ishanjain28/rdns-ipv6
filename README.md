@@ -14,14 +14,16 @@ This program does not handle any aspect related to that.
 
 This program exits after modifying `/etc/hosts`. It can be used with systemd to run at some interval.
 
+It might be better to run this some how on netlink events, I have not looked into it yet.
+
 ```
 # /etc/systemd/system/rdns-ipv6.timer
 [Unit]
 Description=rdns-ipv6
 
 [Timer]
-OnUnitActiveSec=10s
-OnBootSec=10s
+OnUnitActiveSec=30s
+OnBootSec=30s
 
 [Install]
 WantedBy=timers.target
