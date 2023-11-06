@@ -29,7 +29,7 @@ OnBootSec=30s
 WantedBy=timers.target
 
 
-#/etc/systemd/system/rdns-ipv6.Service
+#/etc/systemd/system/rdns-ipv6.service
 [Unit]
 Description=RDNS for IPv6
 
