@@ -5,14 +5,14 @@ use std::net::{IpAddr, Ipv6Addr};
 
 #[derive(Debug)]
 pub struct Record {
-    pub lla: u64,
+    pub lla: [u8; 6],
     pub address: IpAddr,
 }
 
 impl Default for Record {
     fn default() -> Self {
         Self {
-            lla: 0,
+            lla: [0; 6],
             address: IpAddr::from([0, 0, 0, 0]),
         }
     }
@@ -29,7 +29,9 @@ pub async fn fetch_reachable_neighbours(
     while let Some(resp) = resp.try_next().await.map_err(|e| e.to_string())? {
         let record: Record = resp.nlas.into_iter().fold(Default::default(), |mut r, x| {
             match x {
-                Nla::LinkLocalAddress(d) if !d.is_empty() => r.lla = to_u64(&d),
+                Nla::LinkLocalAddress(d) if !d.is_empty() => {
+                    r.lla = [d[0], d[1], d[2], d[3], d[4], d[5]]
+                }
                 Nla::Destination(d) => {
                     r.address = match version {
                         IpVersion::V4 => IpAddr::from([d[0], d[1], d[2], d[3]]),
@@ -42,26 +44,12 @@ pub async fn fetch_reachable_neighbours(
             r
         });
 
-        if record.lla != 0 {
+        if record.lla != [0; 6] {
             output.push(record);
         }
     }
 
     Ok(output)
-}
-
-#[inline]
-const fn to_u64(v: &[u8]) -> u64 {
-    let mut out = 0;
-
-    out |= (v[5] as u64) << ((5 - 5) * 8);
-    out |= (v[4] as u64) << ((5 - 4) * 8);
-    out |= (v[3] as u64) << ((5 - 3) * 8);
-    out |= (v[2] as u64) << ((5 - 2) * 8);
-    out |= (v[1] as u64) << ((5 - 1) * 8);
-    out |= (v[0] as u64) << ((5 - 0) * 8);
-
-    out
 }
 
 fn to_u128(v: &[u8]) -> u128 {
