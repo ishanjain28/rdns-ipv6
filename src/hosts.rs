@@ -112,8 +112,6 @@ impl HostsFile {
         f.write_all(output.join("\n").as_bytes())
             .map_err(|e| e.to_string())?;
 
-        println!("{}", output.join("\n"));
-
         f.flush().map_err(|e| e.to_string())
     }
 }
